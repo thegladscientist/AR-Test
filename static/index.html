@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creative Jobs Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="header-title">Creative Jobs</h1>
+      <span class="badge-new" id="badge-new" title="New jobs fetched today"></span>
+    </div>
+    <div class="header-right">
+      <span class="last-fetch" id="last-fetch">Loading…</span>
+      <button class="btn btn-fetch" id="btn-fetch" title="Trigger a new scrape now">
+        &#8635; Fetch now
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input
+      type="search"
+      id="filter-q"
+      class="filter-input"
+      placeholder="Search title, company, description…"
+      autocomplete="off"
+    />
+    <select id="filter-source" class="filter-select">
+      <option value="">All sources</option>
+    </select>
+    <select id="filter-date" class="filter-select">
+      <option value="">Any time</option>
+      <option value="today">Today</option>
+      <option value="week">Last 7 days</option>
+      <option value="month">Last 30 days</option>
+    </select>
+    <label class="filter-fav">
+      <input type="checkbox" id="filter-favs" />
+      <span>&#9733; Favorites only</span>
+    </label>
+  </div>
+
+  <!-- Job list -->
+  <main class="job-list" id="job-list">
+    <div class="loading" id="loading">Loading jobs…</div>
+  </main>
+
+  <!-- Load more -->
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+    <button class="btn btn-load-more" id="btn-load-more">Load more</button>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="empty-state" style="display:none">
+    <p>No jobs found. Try adjusting your filters or click <strong>Fetch now</strong> to scrape new listings.</p>
+  </div>
+
+  <!-- Fetch toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
