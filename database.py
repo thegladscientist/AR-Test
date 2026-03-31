@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import re
 from datetime import datetime, timezone, date
 
 # Optional PostgreSQL support
@@ -31,27 +32,31 @@ class DBConnection:
         self.conn.close()
 
     def execute(self, sql, params=None):
-        # Normalize SQL for Postgres vs SQLite
+        sql = sql.strip()
+        
         if self.is_postgres:
-            # SQLite uses ? but psycopg2 uses %s for positional
-            # SQLite uses :name but psycopg2 uses %(name)s for named
+            # 1. Normalize placeholders (:name -> %(name)s)
             if params and isinstance(params, dict):
-                import re
                 sql = re.sub(r':([a-zA-Z0-9_]+)', r'%(\1)s', sql)
             elif params:
                 sql = sql.replace('?', '%s')
             
-            # Conflict handling
+            # 2. Normalize "INSERT OR IGNORE" to "INSERT"
             sql = sql.replace("INSERT OR IGNORE", "INSERT")
-            if "INSERT" in sql.upper() and "ON CONFLICT" not in sql.upper():
-                sql += " ON CONFLICT (hash) DO NOTHING"
+            
+            # 3. Add ON CONFLICT for jobs table to prevent "duplicate key" errors
+            if "INTO JOBS" in sql.upper() and "ON CONFLICT" not in sql.upper():
+                if sql.endswith(";"):
+                    sql = sql[:-1] + " ON CONFLICT (hash) DO NOTHING;"
+                else:
+                    sql += " ON CONFLICT (hash) DO NOTHING"
                 
             cur = self.conn.cursor(cursor_factory=RealDictCursor)
             cur.execute(sql, params)
             return cur
         else:
             # SQLite handles :name and ? natively
-            # But we might have added Postgres ON CONFLICT syntax in a generic call
+            # But strip Postgres specific ON CONFLICT if present
             if "ON CONFLICT" in sql.upper():
                 sql = sql.split("ON CONFLICT")[0].replace("INSERT", "INSERT OR IGNORE")
                 
@@ -62,8 +67,7 @@ class DBConnection:
 
     def executescript(self, sql):
         if self.is_postgres:
-            # Postgres doesn't have executescript, just run it
-            # Also normalize INTEGER PRIMARY KEY AUTOINCREMENT -> SERIAL
+            # Normalize for Postgres
             sql = sql.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
             sql = sql.replace("INSERT OR IGNORE", "INSERT")
             cur = self.conn.cursor()
@@ -89,7 +93,7 @@ def init_db():
     with get_conn() as db:
         db.executescript("""
             CREATE TABLE IF NOT EXISTS jobs (
-                id          SERIAL PRIMARY KEY,
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 hash        TEXT UNIQUE NOT NULL,
                 title       TEXT NOT NULL,
                 company     TEXT NOT NULL DEFAULT '',
@@ -108,7 +112,7 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_jobs_favorited   ON jobs(is_favorited);
 
             CREATE TABLE IF NOT EXISTS fetch_log (
-                id            SERIAL PRIMARY KEY,
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 fetched_at    TEXT NOT NULL,
                 new_jobs      INTEGER NOT NULL DEFAULT 0,
                 sources_ok    TEXT,
@@ -177,7 +181,6 @@ def get_jobs(
             f"SELECT COUNT(*) FROM jobs {where}", params
         ).fetchone()
         
-        # Postgres Row vs SQLite Row access
         if db.is_postgres:
             total = total_row['count'] if total_row else 0
         else:
@@ -193,7 +196,6 @@ def get_job_by_id(job_id: int):
 
 
 def toggle_favorite(job_id: int) -> bool:
-    """Toggle favorite flag; return the new value."""
     with get_conn() as db:
         db.execute(
             "UPDATE jobs SET is_favorited = 1 - is_favorited WHERE id = :id",
