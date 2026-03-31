@@ -216,19 +216,23 @@ function buildCard(job) {
           title="${isFav ? "Remove from favorites" : "Add to favorites"}"
           aria-label="Favorite"
           data-id="${job.id}"
-        >&#9733;</button>
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
         <button
           class="btn-icon btn-cal"
           title="Add to calendar"
           aria-label="Add to calendar"
           data-id="${job.id}"
-        >&#128197;</button>
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </button>
       </div>
     </div>
     <div class="job-meta">
       ${job.company ? `<span class="meta-company">${escHtml(job.company)}</span>` : ""}
-      ${job.location ? `<span class="meta-location">${escHtml(job.location)}</span>` : ""}
-      ${job.salary   ? `<span class="meta-salary">${escHtml(job.salary)}</span>` : ""}
+      <div class="meta-item meta-location">${escHtml(job.location || 'Remote/World')}</div>
+      ${job.salary ? ` <div class="meta-item meta-salary">${escHtml(job.salary)}</div>` : ""}
       <span class="meta-source">${escHtml(job.source)}</span>
       ${job.date_fetched ? `<span class="meta-date">${formatDate(job.date_fetched)}</span>` : ""}
     </div>
