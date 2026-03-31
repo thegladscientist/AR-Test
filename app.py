@@ -27,21 +27,24 @@ db.init_db()
 
 FETCH_HOUR = int(os.environ.get("FETCH_HOUR", "8"))
 
-try:
-    from apscheduler.schedulers.background import BackgroundScheduler
-    from apscheduler.triggers.cron import CronTrigger
+if not os.environ.get("VERCEL"):
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        from apscheduler.triggers.cron import CronTrigger
 
-    _scheduler = BackgroundScheduler(daemon=True)
-    _scheduler.add_job(
-        sched.run_all_scrapers,
-        CronTrigger(hour=FETCH_HOUR, minute=0),
-        id="daily_fetch",
-        replace_existing=True,
-    )
-    _scheduler.start()
-    logger.info("Scheduler started — daily fetch at %02d:00", FETCH_HOUR)
-except Exception as exc:
-    logger.warning("APScheduler not available: %s", exc)
+        _scheduler = BackgroundScheduler(daemon=True)
+        _scheduler.add_job(
+            sched.run_all_scrapers,
+            CronTrigger(hour=FETCH_HOUR, minute=0),
+            id="daily_fetch",
+            replace_existing=True,
+        )
+        _scheduler.start()
+        logger.info("Scheduler started — daily fetch at %02d:00", FETCH_HOUR)
+    except Exception as exc:
+        logger.warning("APScheduler not available: %s", exc)
+else:
+    logger.info("Running on Vercel — internal scheduler disabled (using Vercel Cron instead)")
 
 
 # ---------------------------------------------------------------------------

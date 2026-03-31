@@ -15,7 +15,7 @@ SEARCH_QUERIES = [
 
 
 def _fetch_query(query: str) -> list[dict]:
-    resp = get(BASE_URL, params={"search": query, "limit": 20})
+    resp = get(BASE_URL, params={"search": query, "limit": 100})
     if not resp:
         return []
     try:

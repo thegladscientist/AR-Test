@@ -71,12 +71,18 @@ def fetch() -> list[dict]:
     results = []
 
     for config in SEARCH_CONFIGS:
-        resp = get(BASE_URL, params=config)
-        if resp:
-            for job in _parse_page(resp.text):
-                if job["hash"] not in seen:
-                    seen.add(job["hash"])
-                    results.append(job)
-        sleep_between(2, 4)
+        for offset in [0, 10, 20, 30]:
+            params = config.copy()
+            params["start"] = str(offset)
+            resp = get(BASE_URL, params=params)
+            if resp:
+                jobs = _parse_page(resp.text)
+                for job in jobs:
+                    if job["hash"] not in seen:
+                        seen.add(job["hash"])
+                        results.append(job)
+                if not jobs:
+                    break
+            sleep_between(2, 4)
 
     return results

@@ -64,6 +64,15 @@ def is_relevant(title: str, description: str = "") -> bool:
         "director of creative",
         "senior art director",
         "executive creative",
+        "design director",
+        "creative lead",
+        "art director",
+        "experience director",
+        "group creative director",
+        "associate creative director",
+        "head of design",
+        "creative",
+        "design"
     ]
     return any(k in text for k in keywords)
 
@@ -76,6 +85,12 @@ def is_location_ok(location: str) -> bool:
         or "anywhere" in loc
         or "worldwide" in loc
         or "barcelona" in loc
+        or "spain" in loc
+        or "united states" in loc
+        or "usa" in loc
+        or "united kingdom" in loc
+        or "uk" in loc
+        or "europe" in loc
         or location == ""
     )
 
