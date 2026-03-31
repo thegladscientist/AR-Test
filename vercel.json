@@ -8,10 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/api/fetch",
-      "dest": "app.py"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "app.py"
     },
@@ -23,12 +19,6 @@
     {
       "src": "/(.*)",
       "dest": "app.py"
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/fetch",
-      "schedule": "0 8 * * *"
     }
   ]
 }
