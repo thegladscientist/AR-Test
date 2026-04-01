@@ -75,7 +75,7 @@ def is_relevant(title: str, description: str = "") -> bool:
         "design"
     ]
     return any(k in text for k in keywords)
-
+#test
 
 def is_location_ok(location: str) -> bool:
     """Return True if the location is remote or Barcelona."""
